@@ -14,7 +14,7 @@ func TestCreateBucket(t *testing.T) {
 	}
 	req.Header.Add("Userid", adminUser().ID)
 	req.Header.Add("Key", adminUser().Key)
-	req.Header.Add("Name", "test")
+	req.Header.Add("Bucketname", "test")
 
 	w := httptest.NewRecorder()
 	createBucket(w, req)
@@ -35,7 +35,7 @@ func TestListBucket(t *testing.T) {
 	w := httptest.NewRecorder()
 	listBuckets(w, req)
 	if w.Code != 200 {
-		t.Error("Bucket was not created:", w)
+		t.Error("Cannot list bucket:", w)
 	}
 }
 
@@ -51,7 +51,7 @@ func TestGetBucket(t *testing.T) {
 	w := httptest.NewRecorder()
 	getBucket(w, req)
 	if w.Code != 200 {
-		t.Error("Bucket was not created:", w)
+		t.Error("I couldnt get bucket:", w)
 	}
 
 }
@@ -65,9 +65,8 @@ func TestDeleteBucket(t *testing.T) {
 	req.Header.Add("Key", adminUser().Key)
 
 	w := httptest.NewRecorder()
-	getBucket(w, req)
-	fmt.Println(w.Code)
-	if w.Code != 200 {
+	deleteBucket(w, req)
+	if w.Code != 202 {
 		t.Error("Bucket not deleted:", w)
 	}
 }

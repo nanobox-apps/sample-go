@@ -2,6 +2,9 @@ package backendtest
 
 import (
 	"io"
+	"io/ioutil"
+	"strings"
+	
 )
 
 type BackendRecorder struct {
@@ -32,7 +35,7 @@ func (self *BackendRecorder) WriteCloser(id string) (io.WriteCloser, error) {
 func (self *BackendRecorder) ReadCloser(id string) (io.ReadCloser, error) {
 	self.Calls = append(self.Calls, "ReadCloser:"+id)
 	// get the path and filename
-	return self, nil
+	return ioutil.NopCloser(strings.NewReader("object data")), nil
 }
 
 func (self *BackendRecorder) Move(from, to string) error {
@@ -47,7 +50,7 @@ func (self *BackendRecorder) Delete(id string) error {
 
 func NewBackendRecorder() *BackendRecorder {
 	return &BackendRecorder{
-		Calls: []string{"NewBackendRecorder"},
+		Calls: []string{},
 		Written: []byte{},
 	}
 }

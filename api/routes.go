@@ -6,7 +6,7 @@ func registerRoutes() *pat.Router {
 	router := pat.New()
 
 	router.Post("/objects", handleRequest(createObject))
-	router.Get("/object_info/{id}", handleRequest(getObjectInfo))
+	router.Add("HEAD", "/objects/{id}", handleRequest(getObjectInfo))
 	router.Get("/objects/{id}", handleRequest(getObject))
 	router.Put("/objects/{id}", handleRequest(replaceObject))
 	router.Get("/objects", handleRequest(listObjects))

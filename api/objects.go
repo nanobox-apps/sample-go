@@ -6,17 +6,12 @@ import (
 	"github.com/blobstache/blobstache/models"
 	"io"
 	"net/http"
-	"regexp"
+	"strconv"
 )
 
 func replaceObject(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	bucketId := req.Header.Get("Bucketid")
-	re := regexp.MustCompile("/objects/(.*)")
-	id := re.FindStringSubmatch(req.URL.Path)[1]
 	
-	obj, err := models.GetObject(userId, userKey, bucketId, id)
+	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -24,7 +19,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 
 	// create a new temporary file
 	// the new file has an alias that is the id of the old object
-	tmpObj, err := models.CreateObject(userId, userKey, obj.BucketID, obj.ID)
+	tmpObj, err := models.CreateObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
@@ -33,7 +28,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 	// write to the tmp file
 	w, err := tmpObj.WriteCloser()
 	if err != nil {
-		models.DeleteObject(userId, userKey, tmpObj.BucketID, tmpObj.ID)
+		models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -44,7 +39,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 	size, err := io.Copy(w, req.Body)
 	if err != nil {
 		if err = tmpObj.Remove(); err == nil {
-			models.DeleteObject(userId, userKey, tmpObj.BucketID, tmpObj.ID)
+			models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
 		}
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
@@ -54,7 +49,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 	err = tmpObj.Move(obj.ID)
 	if err != nil {
 		if err = obj.Remove(); err == nil {
-			models.DeleteObject(userId, userKey, tmpObj.BucketID, tmpObj.ID)
+			models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
 		}
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
@@ -69,7 +64,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	if err = tmpObj.Remove(); err == nil {
-		models.DeleteObject(userId, userKey, tmpObj.BucketID, tmpObj.ID)
+		models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
 	}
 
 	f, _ := json.Marshal(obj)
@@ -80,21 +75,8 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 }
 
 func createObject(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	bucketId := req.Header.Get("Bucketid")
-	alias := req.Header.Get("Alias")
-
-	if userId == "" || userKey == "" || bucketId == "" {
-		rw.WriteHeader(422)
-		return
-	}
-
-	obj, err := models.CreateObject(userId, userKey, bucketId, alias)
+	obj, err := models.CreateObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
-		fmt.Println("this")
-		fmt.Println(err)
-		fmt.Println("end")
 		rw.WriteHeader(422)
 		return
 	}
@@ -102,7 +84,7 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	w, err := obj.WriteCloser()
 	if err != nil {
 		fmt.Println(err)
-		models.DeleteObject(userId, userKey, obj.BucketID, obj.ID)
+		models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -114,7 +96,7 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		if err = obj.Remove(); err == nil {
-			models.DeleteObject(userId, userKey, obj.BucketID, obj.ID)
+			models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 		}
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
@@ -125,7 +107,7 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		if err = obj.Remove(); err == nil {
-			models.DeleteObject(userId, userKey, obj.BucketID, obj.ID)
+			models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 		}
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
@@ -139,14 +121,7 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 }
 
 func getObject(rw http.ResponseWriter, req *http.Request) {
-	fmt.Println("get object")
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	bucketId := req.Header.Get("Bucketid")
-	re := regexp.MustCompile("/objects/(.*)")
-	id := re.FindStringSubmatch(req.URL.Path)[1]
-
-	obj, err := models.GetObject(userId, userKey, bucketId, id)
+	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
 		rw.WriteHeader(422)
 		return
@@ -169,38 +144,19 @@ func getObject(rw http.ResponseWriter, req *http.Request) {
 }
 
 func getObjectInfo(rw http.ResponseWriter, req *http.Request) {
-	fmt.Println("get object info")
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	bucketId := req.Header.Get("Bucketid")
-	re := regexp.MustCompile("/object_info/(.*)")
-	id := re.FindStringSubmatch(req.URL.Path)[1]
-	
-	obj, err := models.GetObject(userId, userKey, bucketId, id)
+	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
 		fmt.Println(err)
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	b, err := json.Marshal(obj)
-	if err != nil {
-		fmt.Println(err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	rw.Header().Set("Content-Type", "application/json")
-	rw.Write(b)
+	rw.Header().Set("Object-Alias", obj.Alias)
+	rw.Header().Set("Object-Size", strconv.FormatInt(obj.Size, 10))
 }
 
 func deleteObject(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	bucketId := req.Header.Get("Bucketid")
-	re := regexp.MustCompile("/objects/(.*)")
-	id := re.FindStringSubmatch(req.URL.Path)[1]
-	obj, err := models.GetObject(userId, userKey, bucketId, id)
+	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -212,7 +168,7 @@ func deleteObject(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = models.DeleteObject(userId, userKey, obj.BucketID, obj.ID)
+	err = models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 	if err != nil {
 		fmt.Println(err)
 		rw.WriteHeader(422)
@@ -223,10 +179,7 @@ func deleteObject(rw http.ResponseWriter, req *http.Request) {
 }
 
 func listObjects(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	bucketId := req.Header.Get("Bucketid")
-	objs, err := models.ListObjects(userId, userKey, bucketId)
+	objs, err := models.ListObjects(userId(req), userKey(req), bucketId(req))
 	if err != nil {
 		rw.WriteHeader(422)
 		return

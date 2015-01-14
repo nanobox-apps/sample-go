@@ -5,20 +5,10 @@ import (
 	"fmt"
 	"github.com/blobstache/blobstache/models"
 	"net/http"
-	"regexp"
 )
 
 func createBucket(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	name := req.Header.Get("Name")
-	if name == "" || userId == "" || userKey == "" {
-		fmt.Println("missing params")
-		rw.WriteHeader(422) // I need a bucket name
-		return
-	}
-
-	buck, err := models.CreateBucket(userId, userKey, name)
+	buck, err := models.CreateBucket(userId(req), userKey(req), bucketId(req))
 	if err != nil {
 		fmt.Println(err)
 		rw.WriteHeader(422)
@@ -32,12 +22,7 @@ func createBucket(rw http.ResponseWriter, req *http.Request) {
 }
 
 func deleteBucket(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	re := regexp.MustCompile("/buckets/(.*)")
-	id := re.FindStringSubmatch(req.URL.Path)[1]
-
-	err := models.DeleteBucket(userId, userKey, id)
+	err := models.DeleteBucket(userId(req), userKey(req), bucketId(req))
 	if err != nil {
 		fmt.Println(err)
 		rw.WriteHeader(http.StatusNotAcceptable)
@@ -48,12 +33,7 @@ func deleteBucket(rw http.ResponseWriter, req *http.Request) {
 }
 
 func getBucket(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-	re := regexp.MustCompile("/buckets/(.*)")
-	id := re.FindStringSubmatch(req.URL.Path)[1]
-
-	buck, err := models.GetBucket(userId, userKey, id)
+	buck, err := models.GetBucket(userId(req), userKey(req), bucketId(req))
 	if err != nil {
 		fmt.Println(err)
 		rw.WriteHeader(http.StatusNotFound)
@@ -71,15 +51,7 @@ func getBucket(rw http.ResponseWriter, req *http.Request) {
 }
 
 func listBuckets(rw http.ResponseWriter, req *http.Request) {
-	userId := req.Header.Get("Userid")
-	userKey := req.Header.Get("Key")
-
-	if userId == "" || userKey == "" {
-		rw.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	bucks, err := models.ListBuckets(userId, userKey)
+	bucks, err := models.ListBuckets(userId(req), userKey(req))
 	if err != nil {
 		rw.WriteHeader(http.StatusNotFound)
 		return

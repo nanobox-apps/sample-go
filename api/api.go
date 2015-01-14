@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/blobstache/blobstache/models"
 	"net/http"
+	"regexp"
 )
 
 // Start
@@ -59,4 +60,40 @@ func adminAccess(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 
 		fn(rw, req)
 	}
+}
+
+
+func userId(req *http.Request) string {
+	return req.Header.Get("Userid")
+}
+
+func userKey(req *http.Request) string {
+	return req.Header.Get("Key")	
+}
+
+func bucketId(req *http.Request) (id string) {
+	id = req.Header.Get("Bucketname")
+	if id == "" {
+		id = req.Header.Get("Bucketid")
+	}
+	if id == "" {
+		re := regexp.MustCompile("/buckets/(.*)")
+		res := re.FindStringSubmatch(req.URL.Path)
+		if len(res) == 2 {
+			id = res[1]
+		}
+	}
+	return
+}
+
+func objectId(req *http.Request) (id string) {
+	id = req.Header.Get("Objectalias")
+	if id == "" {
+		re := regexp.MustCompile("/objects/(.*)")
+		res := re.FindStringSubmatch(req.URL.Path)
+		if len(res) == 2 {
+			id = res[1]
+		}
+	}
+	return
 }

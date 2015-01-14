@@ -83,8 +83,6 @@ func CreateObject(userId, userKey, bucketId, alias string) (*Object, error) {
 		f.Alias = f.ID
 	}
 
-	fmt.Printf("%+v\n",f)
-
 	stmt, err := DB.Prepare("INSERT INTO objects (id, alias, size, bucket_id) VALUES ($1, $2, $3, (SELECT buckets.id FROM buckets JOIN users ON (buckets.user_id = users.id) WHERE (buckets.id = $4 OR buckets.name = $5) AND users.id = $6 AND users.key = $7))")
 	if err != nil {
 		return nil, err

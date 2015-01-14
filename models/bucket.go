@@ -74,11 +74,11 @@ func ListBuckets(userId, userKey string) (*[]Bucket, error) {
 
 func DeleteBucket(userId, userKey, id string) error {
 	// Delete
-	stmt, err := DB.Prepare("DELETE FROM buckets where id=$1 AND user_id=(SELECT id FROM users WHERE id = $2 and key = $3)")
+	stmt, err := DB.Prepare("DELETE FROM buckets where (id=$1 OR name=$2) AND user_id=(SELECT id FROM users WHERE id = $3 and key = $4)")
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(id, userId, userKey)
+	_, err = stmt.Exec(uid(id), id, userId, userKey)
 	if err != nil {
 		return err
 	}
