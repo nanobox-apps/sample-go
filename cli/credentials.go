@@ -5,47 +5,52 @@ import (
   "flag"
 )
 
-var hostname string
+var host string
 var key string
 var id string
 var bucketid string
 var objectid string
-var filename string
-var out string
+var needHelp bool
 
 func init() {
-	flag.StringVar(&hostname, "location", "", "userhost")
-	flag.StringVar(&hostname, "host", "", "userhost")
-	flag.StringVar(&key, "key", "", "userkey")
-	flag.StringVar(&key, "user-key", "", "userkey")
-	flag.StringVar(&id, "id", "", "userkey")
-	flag.StringVar(&id, "user-id", "", "userkey")
-	flag.StringVar(&bucketid, "bucketid", "", "userkey")
-	flag.StringVar(&bucketid, "bucketname", "", "userkey")
-	flag.StringVar(&objectid, "objectid", "", "userkey")
-	flag.StringVar(&objectid, "objectalias", "", "userkey")
-	flag.StringVar(&filename, "filename", "", "filename")
-	flag.StringVar(&filename, "f", "", "filename")
-	flag.StringVar(&out, "out", "", "output file")
-	flag.StringVar(&out, "o", "", "output file")
+	flag.BoolVar(&needHelp, "h", false, "Show Help")
+	flag.BoolVar(&needHelp, "help", false, "Show Help")
+	flag.StringVar(&host, "location", "", "Server host and port in the format of 'host:port'")
+	flag.StringVar(&host, "host", "", "Server host and port in the format of 'host:port'")
+	flag.StringVar(&host, "server", "", "Server host and port in the format of 'host:port'")
+	flag.StringVar(&key, "key", "", "Access key for your user")
+	flag.StringVar(&key, "user-key", "", "Access key for your user")
+	flag.StringVar(&id, "id", "", "Access id for your user")
+	flag.StringVar(&id, "user-id", "", "Access id for your user")
+	flag.StringVar(&bucketid, "bucketid", "", "The UUID of the bucket you intend to use")
+	flag.StringVar(&bucketid, "bucketname", "", "The Name of the bucket you intend to use")
+	flag.StringVar(&objectid, "objectid", "", "The UUID of the object you intend to use")
+	flag.StringVar(&objectid, "objectalias", "", "The Alias of the object you intend to use")
 
 	flag.Parse()
-	host()
+	if needHelp {
+		help()
+		os.Exit(0)
+	}
+	getHost()
 	userKey()
 	userId()
 	bucketId()
 	objectId()
 }
 
-func host() {
-	val := hostname
+func getHost() {
+	val := host
 	if val == "" {
 		val = os.Getenv("HOST")
 	}
 	if val == "" {
 		val = os.Getenv("LOCATION")
 	}
-	hostname = val
+	if val == "" {
+		val = os.Getenv("SERVER")
+	}
+	host = val
 }
 
 func userKey() {

@@ -36,8 +36,10 @@ func listBuckets() {
 	handleJson(resp)
 }
 
-func createBucket() {
-	resp, err := roundTrip("POST", "/buckets")
+func createBucket(name string) {
+	req := buildRequest("POST", "/buckets")	
+	req.Header.Add("Bucketname", name)
+	resp, err := (&http.Client{}).Do(req)
 	handleError(err)
 	handleJson(resp)
 }
@@ -62,10 +64,11 @@ func listObjects() {
 	handleJson(resp)
 }
 
-func createObject() {
+func createObject(alias string) {
 	// cant user round trip here
 	req := buildRequest("POST", "/objects")	
 	req.Body = os.Stdin
+	req.Header.Add("Objectalias", alias)
 	resp, err := (&http.Client{}).Do(req)
 	handleError(err)
 	handleJson(resp)
@@ -102,7 +105,7 @@ func buildRequest(method, path string) *http.Request {
 		os.Exit(1)
 	}
 
-	req, _ := http.NewRequest(method, hostname+path, nil)
+	req, _ := http.NewRequest(method, "http://"+host+path, nil)
 	req.Header.Add("Userid", id)
 	req.Header.Add("Key", key)
 	req.Header.Add("Bucketid", bucketid)
