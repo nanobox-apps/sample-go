@@ -126,6 +126,11 @@ func getObject(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(422)
 		return
 	}
+	if obj.Size == 0 {
+		rw.WriteHeader(422)
+		rw.Write([]byte("incomplete file"))
+		return
+	}
 
 	rc, err := obj.ReadCloser()
 	if err != nil {

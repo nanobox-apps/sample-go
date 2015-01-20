@@ -4,12 +4,15 @@ import (
 	"github.com/blobstache/blobstache/api"
 	"github.com/blobstache/blobstache/backends"
 	"github.com/blobstache/blobstache/models"
+	_ "net/http/pprof"
+	// "runtime/pprof"
 	"runtime"
 	"fmt"
 	"flag"
 )
 
 func main() {
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	var be models.Storage
@@ -17,6 +20,8 @@ func main() {
 	switch selectedBackend {
 	case "local":
 		be = backends.NewLocalStorage(backendCredentials)
+	case "leo":
+		be = backends.NewLeoStorage(backendCredentials)
 	default:
 		be = backends.NewLocalStorage(backendCredentials)
 	}
@@ -28,8 +33,11 @@ func main() {
 
 	models.CleanEmptyObjects()
 
+
+
 	err = api.Start(port)
 	fmt.Println(err)
+
 }
 
 var port string

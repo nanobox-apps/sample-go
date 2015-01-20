@@ -1,0 +1,6 @@
+gom 'code.google.com/p/go-uuid/uuid'
+gom 'github.com/gorilla/context'
+gom 'github.com/gorilla/mux'
+gom 'github.com/gorilla/pat'
+gom 'github.com/lib/pq'
+gom 'github.com/lib/pq/oid'
