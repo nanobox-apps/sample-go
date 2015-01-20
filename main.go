@@ -20,8 +20,6 @@ func main() {
 	switch selectedBackend {
 	case "local":
 		be = backends.NewLocalStorage(backendCredentials)
-	case "leo":
-		be = backends.NewLeoStorage(backendCredentials)
 	default:
 		be = backends.NewLocalStorage(backendCredentials)
 	}
