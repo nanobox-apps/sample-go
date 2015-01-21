@@ -4,11 +4,10 @@ import (
 	"io"
 	"io/ioutil"
 	"strings"
-	
 )
 
 type BackendRecorder struct {
-	Calls []string
+	Calls   []string
 	Written []byte
 }
 
@@ -50,8 +49,7 @@ func (self *BackendRecorder) Delete(id string) error {
 
 func NewBackendRecorder() *BackendRecorder {
 	return &BackendRecorder{
-		Calls: []string{},
+		Calls:   []string{},
 		Written: []byte{},
 	}
 }
-

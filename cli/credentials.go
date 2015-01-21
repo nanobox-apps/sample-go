@@ -1,8 +1,8 @@
 package main
 
 import (
-  "os"
-  "flag"
+	"flag"
+	"os"
 )
 
 var host string
@@ -96,4 +96,3 @@ func objectId() {
 	}
 	objectid = val
 }
-

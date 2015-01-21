@@ -1,14 +1,14 @@
 package api
 
 import (
-	"testing"
-	"net/http"
-	"net/http/httptest"
+	"fmt"
 	"github.com/blobstache/blobstache/backends/backendtest"
 	"github.com/blobstache/blobstache/models"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"strings"
-	"fmt"
+	"testing"
 )
 
 func TestCreateObject(t *testing.T) {
@@ -69,7 +69,6 @@ func TestGetObject(t *testing.T) {
 	}
 
 }
-
 
 func TestDeleteObject(t *testing.T) {
 	req, err := http.NewRequest("DELETE", "http://example.com/objects/test", nil)

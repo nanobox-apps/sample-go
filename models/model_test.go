@@ -1,10 +1,10 @@
 package models
 
- import (
-  "testing"
-  "regexp"
-  "os"
-  "github.com/blobstache/blobstache/backends"
+import (
+	"github.com/blobstache/blobstache/backends"
+	"os"
+	"regexp"
+	"testing"
 )
 
 func TestMain(m *testing.M) {

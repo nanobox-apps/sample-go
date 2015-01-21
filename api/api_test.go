@@ -1,25 +1,21 @@
 package api
 
 import (
-	"testing"
-  "github.com/blobstache/blobstache/backends/backendtest"
-  "github.com/blobstache/blobstache/models"
-  "os"
+	"fmt"
+	"github.com/blobstache/blobstache/backends/backendtest"
+	"github.com/blobstache/blobstache/models"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
+	"os"
+	"testing"
 )
 
-
 var aUser *models.User
-
-
 
 func TestMain(m *testing.M) {
 	models.Initialize("dbname=test sslmode=disable", backendtest.NewBackendRecorder())
 	os.Exit(m.Run())
 }
-
 
 func TestAdminAccess(t *testing.T) {
 	handler := adminAccess(listUsers)
@@ -42,9 +38,7 @@ func TestAdminAccess(t *testing.T) {
 		t.Error("the admin access didnt let someone through with access")
 	}
 
-	
 }
-
 
 func adminUser() *models.User {
 	if aUser == nil {

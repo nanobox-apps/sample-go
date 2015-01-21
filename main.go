@@ -5,9 +5,9 @@ import (
 	"github.com/blobstache/blobstache/backends"
 	"github.com/blobstache/blobstache/models"
 	// _ "net/http/pprof"
-	"runtime"
-	"fmt"
 	"flag"
+	"fmt"
+	"runtime"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	var be models.Storage
-	
+
 	switch selectedBackend {
 	case "local":
 		be = backends.NewLocalStorage(backendCredentials)
@@ -29,8 +29,6 @@ func main() {
 	}
 
 	models.CleanEmptyObjects()
-
-
 
 	err = api.Start(port)
 	fmt.Println(err)

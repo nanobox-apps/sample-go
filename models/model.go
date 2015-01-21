@@ -88,9 +88,8 @@ func Initialize(creds string, s Storage) error {
 	return nil
 }
 
-
 func StartCleaner() {
-	
+
 }
 
 func uid(val string) string {

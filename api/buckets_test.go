@@ -1,10 +1,10 @@
 package api
 
 import (
-	"testing"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
+	"testing"
 )
 
 func TestCreateBucket(t *testing.T) {
@@ -39,7 +39,6 @@ func TestListBucket(t *testing.T) {
 	}
 }
 
-
 func TestGetBucket(t *testing.T) {
 	req, err := http.NewRequest("GET", "http://example.com/buckets/test", nil)
 	if err != nil {
@@ -70,5 +69,3 @@ func TestDeleteBucket(t *testing.T) {
 		t.Error("Bucket not deleted:", w)
 	}
 }
-
-

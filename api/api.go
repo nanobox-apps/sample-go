@@ -62,13 +62,12 @@ func adminAccess(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	}
 }
 
-
 func userId(req *http.Request) string {
 	return req.Header.Get("Userid")
 }
 
 func userKey(req *http.Request) string {
-	return req.Header.Get("Key")	
+	return req.Header.Get("Key")
 }
 
 func bucketId(req *http.Request) (id string) {

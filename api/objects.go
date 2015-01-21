@@ -10,7 +10,7 @@ import (
 )
 
 func replaceObject(rw http.ResponseWriter, req *http.Request) {
-	
+
 	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
 		rw.WriteHeader(http.StatusNotFound)
@@ -171,7 +171,7 @@ func deleteObject(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err =	obj.Remove()
+	err = obj.Remove()
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return

@@ -127,7 +127,6 @@ func DeleteObject(userId, userKey, bucketId, id string) error {
 	return nil
 }
 
-
 func CleanEmptyObjects() {
 	rows, err := DB.Query("SELECT * FROM objects WHERE size = 0")
 	if err != nil {

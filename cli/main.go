@@ -7,50 +7,48 @@ import (
 )
 
 func main() {
-	if (len(flag.Args()) < 1) {
+	if len(flag.Args()) < 1 {
 		fmt.Println("Thanks for using The Client")
 		help()
-    return
+		return
 	}
 
 	switch flag.Arg(0) {
-  case "list-users", "list_users", "listusers":
-    listUsers()
-  case "create-user", "create_user", "createuser":
-    createUser()
-  case "delete-user", "delete_user", "deleteuser":
-    deleteUser(flag.Arg(1))
-  case "list-buckets", "list_buckets", "listbuckets":
-    listBuckets()
-  case "show-bucket", "show_bucket", "showbucket":
-    showBucket(flag.Arg(1))
-  case "create-bucket", "create_bucket", "createbucket":
-    createBucket(flag.Arg(1))
-  case "delete-bucket", "delete_bucket", "deletebucket":
-    deleteBucket(flag.Arg(1))
-  case "list-objects", "list_objects", "listobjects":
-    listObjects()
-  case "object-size", "object_size", "objectsize":
-    showObjectSize(flag.Arg(1))
-  case "get-object", "get_object", "getobject":
-    getObject(flag.Arg(1))
-  case "create-object", "create_object", "createobject":
-    createObject(flag.Arg(1))
-  case "delete-object", "delete_object", "deleteobject":
-    deleteObject(flag.Arg(1))
+	case "list-users", "list_users", "listusers":
+		listUsers()
+	case "create-user", "create_user", "createuser":
+		createUser()
+	case "delete-user", "delete_user", "deleteuser":
+		deleteUser(flag.Arg(1))
+	case "list-buckets", "list_buckets", "listbuckets":
+		listBuckets()
+	case "show-bucket", "show_bucket", "showbucket":
+		showBucket(flag.Arg(1))
+	case "create-bucket", "create_bucket", "createbucket":
+		createBucket(flag.Arg(1))
+	case "delete-bucket", "delete_bucket", "deletebucket":
+		deleteBucket(flag.Arg(1))
+	case "list-objects", "list_objects", "listobjects":
+		listObjects()
+	case "object-size", "object_size", "objectsize":
+		showObjectSize(flag.Arg(1))
+	case "get-object", "get_object", "getobject":
+		getObject(flag.Arg(1))
+	case "create-object", "create_object", "createobject":
+		createObject(flag.Arg(1))
+	case "delete-object", "delete_object", "deleteobject":
+		deleteObject(flag.Arg(1))
 
-  case "help", "h":
-    help()
-  default:
-    fmt.Printf("I dont know what to do with %s\n", flag.Arg(0))
-    help()
-  }
+	case "help", "h":
+		help()
+	default:
+		fmt.Printf("I dont know what to do with %s\n", flag.Arg(0))
+		help()
+	}
 }
 
-
-
 func help() {
-  fmt.Printf(`
+	fmt.Printf(`
 Usage of client:
   Option:
     When using the client two arguments must be present:
@@ -58,8 +56,8 @@ Usage of client:
     All Options can be set using flags or environment variables
     Flag version:
 `)
- flag.PrintDefaults()
- fmt.Printf(`
+	flag.PrintDefaults()
+	fmt.Printf(`
     Environment Variables version:
     (these options set the same as the flag version)
 HOST        = host

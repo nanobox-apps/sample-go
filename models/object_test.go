@@ -6,7 +6,7 @@ var aBuck *Bucket
 
 func TestCreateObject(t *testing.T) {
 	f, err := CreateObject(adminUser().ID, adminUser().Key, adminBucket().ID, "test")
-	if f == nil || err != nil{
+	if f == nil || err != nil {
 		t.Error("Object should be created %s", err.Error())
 	}
 }

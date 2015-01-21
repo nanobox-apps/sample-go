@@ -1,14 +1,13 @@
 package main
 
 import (
-	"net/http"
+	"encoding/json"
 	"fmt"
-	"os"
 	"io"
 	"io/ioutil"
-	"encoding/json"
+	"net/http"
+	"os"
 )
-
 
 func listUsers() {
 	resp, err := roundTrip("GET", "/users")
@@ -29,7 +28,6 @@ func deleteUser(id string) {
 	fmt.Println("Success")
 }
 
-
 func listBuckets() {
 	resp, err := roundTrip("GET", "/buckets")
 	handleError(err)
@@ -37,7 +35,7 @@ func listBuckets() {
 }
 
 func createBucket(name string) {
-	req := buildRequest("POST", "/buckets")	
+	req := buildRequest("POST", "/buckets")
 	req.Header.Add("Bucketname", name)
 	resp, err := (&http.Client{}).Do(req)
 	handleError(err)
@@ -51,12 +49,11 @@ func showBucket(id string) {
 }
 
 func deleteBucket(id string) {
-	resp, err := roundTrip("DELETE", "/buckets/"+id)	
+	resp, err := roundTrip("DELETE", "/buckets/"+id)
 	handleError(err)
 	handleBadStatus(resp)
 	fmt.Println("Success")
 }
-
 
 func listObjects() {
 	resp, err := roundTrip("GET", "/objects")
@@ -66,7 +63,7 @@ func listObjects() {
 
 func createObject(alias string) {
 	// cant user round trip here
-	req := buildRequest("POST", "/objects")	
+	req := buildRequest("POST", "/objects")
 	req.Body = os.Stdin
 	req.Header.Add("Objectalias", alias)
 	resp, err := (&http.Client{}).Do(req)
@@ -89,13 +86,13 @@ func getObject(id string) {
 }
 
 func deleteObject(id string) {
-	resp, err := roundTrip("DELETE", "/objects/"+id)	
+	resp, err := roundTrip("DELETE", "/objects/"+id)
 	handleError(err)
 	handleBadStatus(resp)
 }
 
 func roundTrip(method, path string) (*http.Response, error) {
-	req := buildRequest(method, path)	
+	req := buildRequest(method, path)
 	return (&http.Client{}).Do(req)
 }
 
@@ -115,7 +112,7 @@ func buildRequest(method, path string) *http.Request {
 
 func handleError(err error) {
 	if err != nil {
-		fmt.Println("An Error Happened:"+ err.Error())
+		fmt.Println("An Error Happened:" + err.Error())
 		os.Exit(1)
 	}
 }
@@ -128,7 +125,7 @@ func handleJson(resp *http.Response) {
 	var i interface{}
 	err = json.Unmarshal(body, &i)
 	body, err = json.MarshalIndent(i, "", "  ")
-	
+
 	fmt.Println(string(body))
 }
 
@@ -137,5 +134,5 @@ func handleBadStatus(resp *http.Response) {
 		fmt.Printf("Failure from server: %+v\n", resp)
 		os.Exit(1)
 	}
-	
+
 }
