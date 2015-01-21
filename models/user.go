@@ -13,13 +13,15 @@ type User struct {
 }
 
 func GetUser(id string) (*User, error) {
-	r, err := DB.Query("SELECT * FROM users WHERE id = $1", id)
+	rows, err := DB.Query("SELECT * FROM users WHERE id = $1", id)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	u := User{}
-	for r.Next() {
-		err = r.Scan(&u.ID, &u.Key, &u.Admin)
+	for rows.Next() {
+		err = rows.Scan(&u.ID, &u.Key, &u.Admin)
 		if err != nil {
 			return nil, err
 		}
@@ -65,6 +67,7 @@ func ListUsers() (*[]User, error) {
 	if err != nil {
 		return &users, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		u := User{}

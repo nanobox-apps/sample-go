@@ -123,10 +123,12 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 func getObject(rw http.ResponseWriter, req *http.Request) {
 	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
+		fmt.Println(err)
 		rw.WriteHeader(422)
 		return
 	}
 	if obj.Size == 0 {
+		fmt.Println("object size is 0", obj.Size)
 		rw.WriteHeader(422)
 		rw.Write([]byte("incomplete file"))
 		return
@@ -134,6 +136,7 @@ func getObject(rw http.ResponseWriter, req *http.Request) {
 
 	rc, err := obj.ReadCloser()
 	if err != nil {
+		fmt.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -143,6 +146,7 @@ func getObject(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Content-Type", "application/octet-stream")
 	_, err = io.Copy(rw, rc)
 	if err != nil {
+		fmt.Println(err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}

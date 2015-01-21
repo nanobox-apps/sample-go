@@ -57,6 +57,7 @@ func GetObject(userId, userKey, bucketId, id string) (*Object, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	f := Object{}
 	for rows.Next() {
@@ -101,6 +102,7 @@ func ListObjects(userId, userKey, bucketId string) (*[]Object, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		f := Object{}
@@ -131,6 +133,8 @@ func CleanEmptyObjects() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		o := Object{}
 		err = rows.Scan(&o.ID, &o.Alias, &o.Size, &o.BucketID)

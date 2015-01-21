@@ -16,13 +16,15 @@ type Bucket struct {
 }
 
 func GetBucket(userID, userKey, id string) (*SizedBucket, error) {
-	r, err := DB.Query("SELECT buckets.*, COALESCE(sum(objects.size), 0) FROM users JOIN buckets ON (buckets.user_id = users.id) LEFT OUTER JOIN objects ON (objects.bucket_id = buckets.id) WHERE (buckets.id = $1 OR buckets.name = $2) AND users.id = $3 AND users.key = $4 GROUP BY buckets.id", uid(id), id, userID, userKey)
+	rows, err := DB.Query("SELECT buckets.*, COALESCE(sum(objects.size), 0) FROM users JOIN buckets ON (buckets.user_id = users.id) LEFT OUTER JOIN objects ON (objects.bucket_id = buckets.id) WHERE (buckets.id = $1 OR buckets.name = $2) AND users.id = $3 AND users.key = $4 GROUP BY buckets.id", uid(id), id, userID, userKey)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	buck := SizedBucket{}
-	for r.Next() {
-		err = r.Scan(&buck.ID, &buck.Name, &buck.UserID, &buck.Size)
+	for rows.Next() {
+		err = rows.Scan(&buck.ID, &buck.Name, &buck.UserID, &buck.Size)
 		if err != nil {
 			return nil, err
 		}
@@ -58,6 +60,7 @@ func ListBuckets(userId, userKey string) (*[]Bucket, error) {
 	if err != nil {
 		return &bucks, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		b := Bucket{}

@@ -58,14 +58,15 @@ func Initialize(creds string, s Storage) error {
 	}
 
 	// create a admin user if we dont have one already
-	r, err := DB.Query("SELECT * FROM users WHERE admin = true")
+	rows, err := DB.Query("SELECT * FROM users WHERE admin = true")
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 	count := 0
-	for r.Next() {
+	for rows.Next() {
 		u := User{}
-		err = r.Scan(&u.ID, &u.Key, &u.Admin)
+		err = rows.Scan(&u.ID, &u.Key, &u.Admin)
 		if err == nil {
 			count += 1
 			fmt.Printf("admin user: %+v\n", u)
