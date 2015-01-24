@@ -1,9 +1,7 @@
 package models
 
 import (
-	"crypto/rand"
 	"fmt"
-	"io"
 )
 
 type User struct {
@@ -81,15 +79,5 @@ func ListUsers() (*[]User, error) {
 }
 
 func generateKey() string {
-	b := make([]byte, 10)
-	io.ReadFull(rand.Reader, b)
-	for i := range b {
-		if b[i] > 0x7E {
-			b[i] = b[i] & 0x7E
-		}
-		if b[i] < 0x21 {
-			b[i] = b[i] | 0x21
-		}
-	}
-	return string(b)
+	return generateID()[26:]
 }
