@@ -75,6 +75,13 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 }
 
 func createObject(rw http.ResponseWriter, req *http.Request) {
+	_, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
+	// If the object already exists replace it
+	if err == nil {
+		replaceObject(rw, req)
+		return
+	}
+
 	obj, err := models.CreateObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
 		rw.WriteHeader(422)

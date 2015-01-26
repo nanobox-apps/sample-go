@@ -9,3 +9,5 @@ Usage of blobstache
   -port="8080": Port to listen on
 
 
+example start
+blobstache -backend=local -backendcredentials=/path/to/glustermount -dbCredentials="dbname=live sslmode=disable username=whatever password=whatever host=whatever port=whatever" -port=1234
