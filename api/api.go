@@ -1,10 +1,10 @@
 package api
 
 import (
-	"fmt"
 	"github.com/blobstache/blobstache/models"
 	"net/http"
 	"regexp"
+	"github.com/jcelliott/lumber"
 )
 
 // Start
@@ -23,7 +23,7 @@ func Start(port string) error {
 // handleRequest
 func handleRequest(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		fmt.Println(`
+		lumber.Info(`
 Request:
 --------------------------------------------------------------------------------
 %+v
@@ -32,7 +32,7 @@ Request:
 
 		//
 		fn(rw, req)
-		fmt.Println(`
+		lumber.Info(`
 Response:
 --------------------------------------------------------------------------------
 %+v
@@ -47,6 +47,7 @@ func adminAccess(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 		userKey := req.Header.Get("Key")
 
 		if userId == "" || userKey == "" {
+			lumber.Error("no userid or key given")
 			rw.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -54,6 +55,7 @@ func adminAccess(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 		// get a user and return it
 		user, _ := models.GetUser(userId)
 		if user == nil || user.Key != userKey || user.Admin == false {
+			lumber.Error("User not authorized %+v", user)
 			rw.WriteHeader(http.StatusNotFound)
 			return
 		}

@@ -5,12 +5,14 @@ import (
 	"github.com/blobstache/blobstache/backends"
 	"github.com/blobstache/blobstache/models"
 	// _ "net/http/pprof"
+	"github.com/jcelliott/lumber"
 	"flag"
-	"fmt"
 	"runtime"
 )
 
 func main() {
+
+	setLogLevel()
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -31,16 +33,38 @@ func main() {
 	models.CleanEmptyObjects()
 
 	err = api.Start(port)
-	fmt.Println(err)
+	lumber.Error(err.Error())
 
+}
+
+func setLogLevel() {
+	switch level {
+	case "TRACE":
+		lumber.Level(0)
+	case "DEBUG":
+		lumber.Level(1)
+	case"INFO":
+		lumber.Level(2)
+	case"WARN":
+		lumber.Level(3)
+	case"ERROR":
+		lumber.Level(4)
+	case"FATAL":
+		lumber.Level(0)
+	default:
+		lumber.Info("the log level provided ("+level+") is not available, defaulting to INFO")
+	}
+	
 }
 
 var port string
 var dbCredentials string
 var selectedBackend string
 var backendCredentials string
+var level string
 
 func init() {
+	flag.StringVar(&level, "level", "INFO", "Log level (available options are TRACE, DEBUG, INFO, WARN, ERROR, FATAL")
 	flag.StringVar(&port, "port", "8080", "Port to listen on")
 	flag.StringVar(&dbCredentials, "dbCredentials", "dbname=live sslmode=disable", "Connection string for database connection")
 	flag.StringVar(&selectedBackend, "backend", "local", "Backend data storage")

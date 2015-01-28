@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/jcelliott/lumber"
 	"github.com/blobstache/blobstache/models"
 	"net/http"
 )
@@ -10,7 +10,7 @@ import (
 func createBucket(rw http.ResponseWriter, req *http.Request) {
 	buck, err := models.CreateBucket(userId(req), userKey(req), bucketId(req))
 	if err != nil {
-		fmt.Println(err)
+		lumber.Error("New Bucket :%s",err.Error())
 		rw.WriteHeader(422)
 		return
 	}
@@ -24,7 +24,7 @@ func createBucket(rw http.ResponseWriter, req *http.Request) {
 func deleteBucket(rw http.ResponseWriter, req *http.Request) {
 	err := models.DeleteBucket(userId(req), userKey(req), bucketId(req))
 	if err != nil {
-		fmt.Println(err)
+		lumber.Error("Delete Bucket :%s",err.Error())
 		rw.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
@@ -35,7 +35,7 @@ func deleteBucket(rw http.ResponseWriter, req *http.Request) {
 func getBucket(rw http.ResponseWriter, req *http.Request) {
 	buck, err := models.GetBucket(userId(req), userKey(req), bucketId(req))
 	if err != nil {
-		fmt.Println(err)
+		lumber.Error("Get Bucket :%s",err.Error())
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -53,12 +53,14 @@ func getBucket(rw http.ResponseWriter, req *http.Request) {
 func listBuckets(rw http.ResponseWriter, req *http.Request) {
 	bucks, err := models.ListBuckets(userId(req), userKey(req))
 	if err != nil {
+		lumber.Error("List Bucket :%s",err.Error())
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	b, err := json.Marshal(bucks)
 	if err != nil {
+		lumber.Error("List Bucket: Parse Json :%s",err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
