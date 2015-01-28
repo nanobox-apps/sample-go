@@ -83,7 +83,6 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	_, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	// If the object already exists replace it
 	if err == nil {
-		lumber.Error("Create Object: Get existing :%s",err.Error())		
 		replaceObject(rw, req)
 		return
 	}
