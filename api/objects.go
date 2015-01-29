@@ -58,6 +58,9 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	// I have no need for the db record anymore
+	models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
+
 
 	// set size of replaced object
 	obj.Size = int64(size)
@@ -68,9 +71,6 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err = tmpObj.Remove(); err == nil {
-		models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
-	}
 
 	f, _ := json.Marshal(obj)
 
@@ -118,7 +118,7 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	obj.Size = int64(size)
 	err = models.SaveObject(obj)
 	if err != nil {
-		lumber.Error("Create Object: Save :%s",err.Error())		
+		lumber.Error("Create Object: Save :%s",err.Error())
 		if err = obj.Remove(); err == nil {
 			models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 		}
