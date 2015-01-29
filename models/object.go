@@ -98,7 +98,7 @@ func CreateObject(userId, userKey, bucketId, alias string) (*Object, error) {
 
 func ListObjects(userId, userKey, bucketId string) (*[]Object, error) {
 	fs := []Object{}
-	rows, err := DB.Query("SELECT objects.* FROM users JOIN buckets ON (buckets.user_id = users.id) JOIN objects ON (objects.bucket_id = buckets.id) WHERE (buckets.id = $1 OR buckets.name = $2) AND users.id = $3 AND users.key = $4", uid(bucketId), bucketId, userId, userKey)
+	rows, err := DB.Query("SELECT objects.* FROM users JOIN buckets ON (buckets.user_id = users.id) JOIN objects ON (objects.bucket_id = buckets.id) WHERE objects.size != 0 AND (buckets.id = $1 OR buckets.name = $2) AND users.id = $3 AND users.key = $4", uid(bucketId), bucketId, userId, userKey)
 	if err != nil {
 		return nil, err
 	}

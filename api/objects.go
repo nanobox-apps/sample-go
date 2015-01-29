@@ -188,8 +188,12 @@ func deleteObject(rw http.ResponseWriter, req *http.Request) {
 	err = obj.Remove()
 	if err != nil {
 		lumber.Error("Delete Object: Remove :%s",err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
+		if obj.Size != 0 {
+			// if the object size is 0 dont worry about a failed remove
+			// chances are the object didnt have any data in it.
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	err = models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
