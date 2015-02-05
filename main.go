@@ -4,7 +4,7 @@ import (
 	"github.com/blobstache/blobstache/api"
 	"github.com/blobstache/blobstache/backends"
 	"github.com/blobstache/blobstache/models"
-	// _ "net/http/pprof"
+	_ "net/http/pprof"
 	"github.com/jcelliott/lumber"
 	"flag"
 	"runtime"
@@ -50,7 +50,7 @@ func setLogLevel() {
 	case"ERROR":
 		lumber.Level(4)
 	case"FATAL":
-		lumber.Level(0)
+		lumber.Level(5)
 	default:
 		lumber.Info("the log level provided ("+level+") is not available, defaulting to INFO")
 	}

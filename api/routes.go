@@ -1,7 +1,7 @@
 package api
 
 import "github.com/gorilla/pat"
-
+import "net/http"
 func registerRoutes() *pat.Router {
 	router := pat.New()
 
@@ -21,6 +21,10 @@ func registerRoutes() *pat.Router {
 	router.Get("/users", handleRequest(adminAccess(listUsers)))
 	router.Post("/users", handleRequest(adminAccess(createUser)))
 	router.Delete("/users/{id}", handleRequest(adminAccess(deleteUser)))
+
+	router.Get("/", func(rw http.ResponseWriter, req *http.Request) {
+		rw.Write([]byte("привет мир"))
+	})
 
 	return router
 }

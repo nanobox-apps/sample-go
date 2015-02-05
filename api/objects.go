@@ -61,7 +61,6 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 	// I have no need for the db record anymore
 	models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
 
-
 	// set size of replaced object
 	obj.Size = int64(size)
 	err = models.SaveObject(obj)
