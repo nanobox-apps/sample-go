@@ -17,6 +17,7 @@ type Storage interface {
 	ReadCloser(id string) (io.ReadCloser, error)
 	Move(from, to string) error
 	Delete(id string) error
+	FileExists(id string) bool
 }
 
 var backend Storage

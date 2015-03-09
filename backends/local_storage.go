@@ -39,6 +39,19 @@ func (self *LocalStorage) Delete(id string) error {
 	return os.Remove(self.fullPath(id))
 }
 
+func (self *LocalStorage) FileExists(id string) bool {
+	f, err := os.Open(self.fullPath(id))
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	_, err = f.Stat()
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func (self *LocalStorage) dirPath(id string) string {
 	re := regexp.MustCompile(`/\w*$`)
 	return re.ReplaceAllString(self.fullPath(id), "")

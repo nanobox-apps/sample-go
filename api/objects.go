@@ -70,6 +70,12 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if !obj.Exists() {
+		lumber.Error("Replace Object: Confirm file: File didnt exist on the file system")
+		models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	f, _ := json.Marshal(obj)
 
@@ -121,6 +127,13 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 		if err = obj.Remove(); err == nil {
 			models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 		}
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if !obj.Exists() {
+		lumber.Error("Create Object: Confirm file: File didnt exist on the file system")
+		models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}

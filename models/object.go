@@ -37,6 +37,10 @@ func (self *Object) Remove() error {
 	return backend.Delete(self.ID)
 }
 
+func (self *Object) Exists() bool {
+	return backend.FileExists(self.ID)
+}
+
 func SaveObject(newObject *Object) error {
 	stmt, err := DB.Prepare("UPDATE objects SET alias=$2, size=$3 WHERE id=$1")
 	if err != nil {
