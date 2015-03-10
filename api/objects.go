@@ -52,7 +52,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 	err = tmpObj.Move(obj.ID)
 	if err != nil {
 		lumber.Error("Replace Object: Move Tmp :%s",err.Error())
-		if err = obj.Remove(); err == nil {
+		if err = tmpObj.Remove(); err == nil {
 			models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
 		}
 		rw.WriteHeader(http.StatusInternalServerError)
