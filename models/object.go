@@ -78,9 +78,14 @@ func GetObject(userId, userKey, bucketId, id string) (*Object, error) {
 }
 
 func CreateObject(userId, userKey, bucketId, alias string) (*Object, error) {
+	bucket, err := GetBucket(userId, userKey, bucketId)
+	if err != nil {
+		return nil, err
+	}
+
 	f := Object{
 		ID:       generateID(),
-		BucketID: bucketId,
+		BucketID: bucket.ID,
 		Alias:    alias,
 	}
 
