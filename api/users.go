@@ -5,10 +5,12 @@ import (
 	"github.com/blobstache/blobstache/models"
 	"net/http"
 	"github.com/jcelliott/lumber"
+	"strconv"
 )
 
 func createUser(rw http.ResponseWriter, req *http.Request) {
-	newUser, err := models.CreateUser()
+	s := sizeLimit(req)
+	newUser, err := models.CreateUser(s)
 	if err != nil {
 		lumber.Error("Create User: Create :%s",err.Error())
 		rw.WriteHeader(422)
@@ -51,3 +53,10 @@ func listUsers(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(b)
 }
+
+func sizeLimit(req *http.Request) int64 {
+	size := req.Header.Get("Limit")
+	val, _ := strconv.ParseInt(size, 10, 64)
+	return val
+}
+

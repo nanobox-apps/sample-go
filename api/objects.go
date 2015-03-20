@@ -138,6 +138,17 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// get the user and make sure we are still in the limit
+	usr, err := models.GetUser(userId(req))
+	if err == nil && usr.LimitExceeded() {
+		lumber.Error("Create Object: LimitExceeded")
+		if err = obj.Remove(); err == nil {
+			models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
+		}
+		rw.WriteHeader(http.StatusNotAcceptable)
+		return
+	}
+
 	f, _ := json.Marshal(obj)
 
 	rw.WriteHeader(http.StatusCreated)

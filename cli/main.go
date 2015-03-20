@@ -17,7 +17,7 @@ func main() {
 	case "list-users", "list_users", "listusers":
 		listUsers()
 	case "create-user", "create_user", "createuser":
-		createUser()
+		createUser(flag.Arg(1))
 	case "delete-user", "delete_user", "deleteuser":
 		deleteUser(flag.Arg(1))
 	case "list-buckets", "list_buckets", "listbuckets":

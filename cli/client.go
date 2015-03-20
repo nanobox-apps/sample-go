@@ -15,8 +15,10 @@ func listUsers() {
 	handleJson(resp)
 }
 
-func createUser() {
-	resp, err := roundTrip("POST", "/users")
+func createUser(size string) {
+	req := buildRequest("POST", "/users")
+	req.Header.Add("Userid", size)
+	resp, err := (&http.Client{}).Do(req)
 	handleError(err)
 	handleJson(resp)
 }
@@ -89,6 +91,7 @@ func deleteObject(id string) {
 	resp, err := roundTrip("DELETE", "/objects/"+id)
 	handleError(err)
 	handleBadStatus(resp)
+	fmt.Println("Success")
 }
 
 func roundTrip(method, path string) (*http.Response, error) {

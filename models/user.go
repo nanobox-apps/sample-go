@@ -7,11 +7,35 @@ import (
 type User struct {
 	ID    string
 	Key   string
+	Limit int64
 	Admin bool
 }
 
+func (self *User) LimitExceeded() bool {
+	if self.Limit == 0 {
+		return false
+	}
+
+	rows, err := DB.Query("SELECT COALESCE(sum(objects.size), 0) FROM users JOIN buckets ON (buckets.user_id = users.id) LEFT OUTER JOIN objects ON (objects.bucket_id = buckets.id) WHERE users.id = $1 GROUP BY users.id", self.ID)
+	if err != nil {
+		return false
+	}
+	defer rows.Close()
+
+	var size int64
+
+	for rows.Next() {
+		err = rows.Scan(&size)
+		if err != nil {
+			return false
+		}
+		break
+	}
+	return (self.Limit < size)
+}
+
 func GetUser(id string) (*User, error) {
-	rows, err := DB.Query("SELECT * FROM users WHERE id = $1", id)
+	rows, err := DB.Query("SELECT id, key, maxsize, admin FROM users WHERE id = $1", id)
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +43,7 @@ func GetUser(id string) (*User, error) {
 
 	u := User{}
 	for rows.Next() {
-		err = rows.Scan(&u.ID, &u.Key, &u.Admin)
+		err = rows.Scan(&u.ID, &u.Key, &u.Limit, &u.Admin)
 		if err != nil {
 			return nil, err
 		}
@@ -27,18 +51,19 @@ func GetUser(id string) (*User, error) {
 	return &u, nil
 }
 
-func CreateUser() (*User, error) {
+func CreateUser(size int64) (*User, error) {
 	usr := User{
 		ID:    generateID(),
 		Key:   generateKey(),
+		Limit: size,
 		Admin: false,
 	}
 
-	stmt, err := DB.Prepare("INSERT INTO users (id, key, admin) VALUES ($1, $2, FALSE)")
+	stmt, err := DB.Prepare("INSERT INTO users (id, key, maxsize, admin) VALUES ($1, $2, $3, FALSE)")
 	if err != nil {
 		return nil, err
 	}
-	_, err = stmt.Exec(usr.ID, usr.Key)
+	_, err = stmt.Exec(usr.ID, usr.Key, usr.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +86,7 @@ func DeleteUser(id string) error {
 
 func ListUsers() (*[]User, error) {
 	users := []User{}
-	rows, err := DB.Query("SELECT * FROM users")
+	rows, err := DB.Query("SELECT id, key, maxsize, admin FROM users")
 	if err != nil {
 		return &users, err
 	}
@@ -69,7 +94,7 @@ func ListUsers() (*[]User, error) {
 
 	for rows.Next() {
 		u := User{}
-		err := rows.Scan(&u.ID, &u.Key, &u.Admin)
+		err := rows.Scan(&u.ID, &u.Key, &u.Limit, &u.Admin)
 		if err != nil {
 			return &users, err
 		}

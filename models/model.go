@@ -41,7 +41,7 @@ func Initialize(creds string, s Storage) error {
 	DB = database
 
 	// create the user table
-	_, err = DB.Exec("CREATE TABLE IF NOT EXISTS users (id uuid PRIMARY KEY,key character(10) NOT NULL,admin bool DEFAULT FALSE)")
+	_, err = DB.Exec("CREATE TABLE IF NOT EXISTS users (id uuid PRIMARY KEY,key character(10) NOT NULL, maxsize bigint DEFAULT 0, admin bool DEFAULT FALSE)")
 	if err != nil {
 		return err
 	}
@@ -77,11 +77,12 @@ func Initialize(creds string, s Storage) error {
 		usr := User{
 			ID:    generateID(),
 			Key:   generateKey(),
+			Limit: 0,
 			Admin: true,
 		}
-		stmt, err := DB.Prepare("INSERT INTO users (id, key, admin) VALUES ($1, $2, $3)")
+		stmt, err := DB.Prepare("INSERT INTO users (id, key, maxsize, admin) VALUES ($1, $2, $3, $4)")
 		if err == nil {
-			stmt.Exec(usr.ID, usr.Key, usr.Admin)
+			stmt.Exec(usr.ID, usr.Key, usr.Limit, usr.Admin)
 			fmt.Printf("creating admin user:%+v\n", usr)
 		}
 	}

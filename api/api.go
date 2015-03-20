@@ -53,7 +53,10 @@ func adminAccess(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 		}
 
 		// get a user and return it
-		user, _ := models.GetUser(userId)
+		user, err := models.GetUser(userId)
+		if err != nil {
+			lumber.Error("get user: %s", err.Error())
+		}
 		if user == nil || user.Key != userKey || user.Admin == false {
 			lumber.Error("User not authorized %+v", user)
 			rw.WriteHeader(http.StatusNotFound)
