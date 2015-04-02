@@ -48,6 +48,16 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// before we move lets make sure the existing object exists on the system
+	old, err := obj.WriteCloser()
+	if err != nil {
+		lumber.Error("Replace Object: Create old if not exists :%s",err.Error())
+		models.DeleteObject(userId(req), userKey(req), tmpObj.BucketID, tmpObj.ID)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	old.Close()
+
 	// move the tmp object to the existing one
 	err = tmpObj.Move(obj.ID)
 	if err != nil {
@@ -204,13 +214,16 @@ func deleteObject(rw http.ResponseWriter, req *http.Request) {
 	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
 		lumber.Error("Delete Object: Get :%s",err.Error())
-		rw.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusAccepted)
 		return
 	}
 
 	err = obj.Remove()
 	if err != nil {
 		lumber.Error("Delete Object: Remove :%s",err.Error())
+		// if i cant remove it im assuming it was already gone
+		// we will probably need to check on this sometime soon
+		// to confirm we are not leaving cruft
 		if obj.Size != 0 {
 			// if the object size is 0 dont worry about a failed remove
 			// chances are the object didnt have any data in it.
@@ -222,7 +235,7 @@ func deleteObject(rw http.ResponseWriter, req *http.Request) {
 	err = models.DeleteObject(userId(req), userKey(req), obj.BucketID, obj.ID)
 	if err != nil {
 		lumber.Error("Delete Object: Delete :%s",err.Error())
-		rw.WriteHeader(422)
+		rw.WriteHeader(http.StatusAccepted)
 		return
 	}
 
