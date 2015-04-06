@@ -3,7 +3,9 @@ package backends
 import (
 	"io"
 	"os"
+	"io/ioutil"
 	"regexp"
+	"strings"
 )
 
 type LocalStorage struct {
@@ -36,7 +38,21 @@ func (self *LocalStorage) Move(from, to string) error {
 
 func (self *LocalStorage) Delete(id string) error {
 	// get the path and filename
-	return os.Remove(self.fullPath(id))
+	err := os.Remove(self.fullPath(id))
+	if err == nil {
+		go func() {
+			dir := self.dirPath(id)
+			re := regexp.MustCompile(`/\w*$`)
+
+			for i := 1; i < len(strings.Split(id, "-")); i++ {
+				if emptyFolder(dir) {
+					os.Remove(dir)
+				}
+				dir = re.ReplaceAllString(dir, "")
+			}
+		}()
+	}
+	return err
 }
 
 func (self *LocalStorage) FileExists(id string) bool {
@@ -60,4 +76,12 @@ func (self *LocalStorage) dirPath(id string) string {
 func (self *LocalStorage) fullPath(id string) string {
 	re := regexp.MustCompile("-")
 	return self.path + "/" + re.ReplaceAllString(id, "/")
+}
+
+func emptyFolder(dir string) bool {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil || len(files) > 0 {
+		return false
+	}
+	return true
 }
