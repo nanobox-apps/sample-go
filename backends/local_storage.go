@@ -39,7 +39,7 @@ func (self *LocalStorage) Move(from, to string) error {
 func (self *LocalStorage) Delete(id string) error {
 	// get the path and filename
 	err := os.Remove(self.fullPath(id))
-	if err == nil {
+	if err == nil || strings.Contains(err.Error(), "no such file") {
 		go func() {
 			dir := self.dirPath(id)
 			re := regexp.MustCompile(`/\w*$`)
