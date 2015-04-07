@@ -7,6 +7,7 @@ import (
 	"github.com/jcelliott/lumber"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func replaceObject(rw http.ResponseWriter, req *http.Request) {
@@ -219,7 +220,7 @@ func deleteObject(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	err = obj.Remove()
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "no such file") {
 		lumber.Error("Delete Object: Remove :%s",err.Error())
 		// if i cant remove it im assuming it was already gone
 		// we will probably need to check on this sometime soon
