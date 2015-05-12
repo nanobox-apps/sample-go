@@ -53,13 +53,13 @@ func Initialize(creds string, s Storage) error {
 	}
 
 	// create the objects table
-	_, err = DB.Exec("CREATE TABLE IF NOT EXISTS objects (id uuid PRIMARY KEY, alias character varying(255) NOT NULL, size bigint, bucket_id uuid references buckets(id) NOT NULL, UNIQUE (bucket_id, alias))")
+	_, err = DB.Exec("CREATE TABLE IF NOT EXISTS objects (id uuid PRIMARY KEY, alias character varying(255) NOT NULL, size bigint, checksum character(32), bucket_id uuid references buckets(id) NOT NULL, UNIQUE (bucket_id, alias))")
 	if err != nil {
 		return err
 	}
 
 	// create a admin user if we dont have one already
-	rows, err := DB.Query("SELECT * FROM users WHERE admin = true")
+	rows, err := DB.Query("SELECT id, key, maxsize, admin FROM users WHERE admin = true")
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func Initialize(creds string, s Storage) error {
 	count := 0
 	for rows.Next() {
 		u := User{}
-		err = rows.Scan(&u.ID, &u.Key, &u.Admin)
+		err = rows.Scan(&u.ID, &u.Key, &u.Limit, &u.Admin)
 		if err == nil {
 			count += 1
 			fmt.Printf("admin user: %+v\n", u)

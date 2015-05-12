@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"github.com/blobstache/blobstache/models"
 	"io"
+	"fmt"
+	"crypto/md5"
 	"github.com/jcelliott/lumber"
 	"net/http"
 	"strconv"
@@ -38,8 +40,10 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 	defer w.Close()
 	defer req.Body.Close()
 
-	// fill in the tmp object
-	size, err := io.Copy(w, req.Body)
+	hash := md5.New()
+	multiWriter := io.MultiWriter(hash, w)
+
+	size, err := io.Copy(multiWriter, req.Body)
 	if err != nil {
 		lumber.Error("Replace Object: Copy to tmp :%s",err.Error())
 		if err = tmpObj.Remove(); err == nil {
@@ -74,6 +78,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 
 	// set size of replaced object
 	obj.Size = int64(size)
+	obj.CheckSum = fmt.Sprintf("%x", hash.Sum(nil))
 	err = models.SaveObject(obj)
 	if err != nil {
 		lumber.Error("Replace Object: Save Existing :%s",err.Error())
@@ -121,7 +126,10 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	defer w.Close()
 	defer req.Body.Close()
 
-	size, err := io.Copy(w, req.Body)
+	hash := md5.New()
+	multiWriter := io.MultiWriter(hash, w)
+
+	size, err := io.Copy(multiWriter, req.Body)
 	if err != nil {
 		lumber.Error("Create Object: Copy :%s",err.Error())		
 		if err = obj.Remove(); err == nil {
@@ -132,6 +140,7 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	}
 	//
 	obj.Size = int64(size)
+	obj.CheckSum = fmt.Sprintf("%x", hash.Sum(nil))
 	err = models.SaveObject(obj)
 	if err != nil {
 		lumber.Error("Create Object: Save :%s",err.Error())
@@ -209,6 +218,7 @@ func getObjectInfo(rw http.ResponseWriter, req *http.Request) {
 
 	rw.Header().Set("Object-Alias", obj.Alias)
 	rw.Header().Set("Object-Size", strconv.FormatInt(obj.Size, 10))
+	rw.Header().Set("Object-Checksum", obj.CheckSum)
 }
 
 func deleteObject(rw http.ResponseWriter, req *http.Request) {
