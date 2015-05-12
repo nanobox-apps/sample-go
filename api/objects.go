@@ -106,6 +106,8 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	if err == nil {
 		replaceObject(rw, req)
 		return
+	} else {
+		lumber.ERROR("Create Object: Get Existing :%s",err.Error())
 	}
 
 	obj, err := models.CreateObject(userId(req), userKey(req), bucketId(req), objectId(req))
