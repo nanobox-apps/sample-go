@@ -11,10 +11,12 @@ var id string
 var bucketid string
 var objectid string
 var needHelp bool
+var public bool
 
 func init() {
 	flag.BoolVar(&needHelp, "h", false, "Show Help")
 	flag.BoolVar(&needHelp, "help", false, "Show Help")
+	flag.BoolVar(&public, "public", false, "Public object on create")
 	flag.StringVar(&host, "location", "", "Server host and port in the format of 'host:port'")
 	flag.StringVar(&host, "host", "", "Server host and port in the format of 'host:port'")
 	flag.StringVar(&host, "server", "", "Server host and port in the format of 'host:port'")

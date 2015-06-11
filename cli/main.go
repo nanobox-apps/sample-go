@@ -14,11 +14,11 @@ func main() {
 	}
 
 	switch flag.Arg(0) {
-	case "list-users", "list_users", "listusers":
+	case "list-repos", "list_repos", "listrepos", "list-users", "list_users", "listusers":
 		listUsers()
-	case "create-user", "create_user", "createuser":
+	case "create-repo", "create_repo", "createrepo", "create-user", "create_user", "createuser":
 		createUser(flag.Arg(1))
-	case "delete-user", "delete_user", "deleteuser":
+	case "delete-repo", "delete_repo", "deleterepo", "delete-user", "delete_user", "deleteuser":
 		deleteUser(flag.Arg(1))
 	case "list-buckets", "list_buckets", "listbuckets":
 		listBuckets()

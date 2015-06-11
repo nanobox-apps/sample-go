@@ -101,3 +101,12 @@ func objectId(req *http.Request) (id string) {
 	}
 	return
 }
+
+func parsePublicPath(req *http.Request) (user, bucket, object string) {
+	re := regexp.MustCompile(`/([\w|\d|-]*)/([\w|\d|-]*)/(.*)`)
+	res := re.FindStringSubmatch(req.URL.Path)
+	if len(res) == 4 {
+		return res[1], res[2], res[3]
+	}
+	return "","",""
+}

@@ -11,6 +11,7 @@ type Object struct {
 	BucketID string
 	Alias    string
 	CheckSum string
+	Public   bool
 	Size     int64
 }
 
@@ -43,22 +44,23 @@ func (self *Object) Exists() bool {
 }
 
 func SaveObject(newObject *Object) error {
-	stmt, err := DB.Prepare("UPDATE objects SET alias=$2, checksum=$3, size=$4 WHERE id=$1")
+	stmt, err := DB.Prepare("UPDATE objects SET alias=$2, checksum=$3, size=$4, public=$5 WHERE id=$1")
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(newObject.ID, newObject.Alias, newObject.CheckSum, newObject.Size)
+	_, err = stmt.Exec(newObject.ID, newObject.Alias, newObject.CheckSum, newObject.Size, newObject.Public)
 
-	stmt, err = DB.Prepare("INSERT INTO objects (id, alias, checksum, size, bucket_id) SELECT $1, $2, $3, $4, $5 WHERE NOT EXISTS (SELECT 1 FROM objects WHERE id=$1)")
+	stmt, err = DB.Prepare("INSERT INTO objects (id, alias, checksum, size, public, bucket_id) SELECT $1, $2, $3, $4, $5, $6 WHERE NOT EXISTS (SELECT 1 FROM objects WHERE id=$1)")
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(newObject.ID, newObject.Alias, newObject.CheckSum, newObject.Size, newObject.BucketID)
+	_, err = stmt.Exec(newObject.ID, newObject.Alias, newObject.CheckSum, newObject.Size, newObject.Public, newObject.BucketID)
 	return nil
 }
 
-func GetObject(userId, userKey, bucketId, id string) (*Object, error) {
-	rows, err := DB.Query("SELECT objects.id, objects.alias, objects.checksum, objects.size, objects.bucket_id FROM users JOIN buckets ON (buckets.user_id = users.id) JOIN objects ON (objects.bucket_id = buckets.id) WHERE (objects.id = $1 OR objects.alias = $2) AND users.id = $3 AND users.key = $4 AND (buckets.id = $5 OR buckets.name = $6)", uid(id), id, userId, userKey, uid(bucketId), bucketId)
+func GetPublicObject(userId, bucketId, id string) (*Object, error) {
+	fmt.Println(userId, bucketId, id)
+	rows, err := DB.Query("SELECT objects.id, objects.alias, objects.checksum, objects.size, objects.bucket_id, objects.public FROM users JOIN buckets ON (buckets.user_id = users.id) JOIN objects ON (objects.bucket_id = buckets.id) WHERE objects.public AND (objects.id = $1 OR objects.alias = $2) AND users.id = $3 AND (buckets.id = $4 OR buckets.name = $5)", uid(id), id, userId, uid(bucketId), bucketId)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +68,28 @@ func GetObject(userId, userKey, bucketId, id string) (*Object, error) {
 
 	f := Object{}
 	for rows.Next() {
-		err = rows.Scan(&f.ID, &f.Alias, &f.CheckSum, &f.Size, &f.BucketID)
+		err = rows.Scan(&f.ID, &f.Alias, &f.CheckSum, &f.Size, &f.BucketID, &f.Public)
+		if err != nil {
+			return nil, err
+		}
+		break
+	}
+	if f.ID == "" {
+		return nil, errors.New("not found")
+	}
+	return &f, nil
+}
+
+func GetObject(userId, userKey, bucketId, id string) (*Object, error) {
+	rows, err := DB.Query("SELECT objects.id, objects.alias, objects.checksum, objects.size, objects.bucket_id, objects.public FROM users JOIN buckets ON (buckets.user_id = users.id) JOIN objects ON (objects.bucket_id = buckets.id) WHERE (objects.id = $1 OR objects.alias = $2) AND users.id = $3 AND users.key = $4 AND (buckets.id = $5 OR buckets.name = $6)", uid(id), id, userId, userKey, uid(bucketId), bucketId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	f := Object{}
+	for rows.Next() {
+		err = rows.Scan(&f.ID, &f.Alias, &f.CheckSum, &f.Size, &f.BucketID, &f.Public)
 		if err != nil {
 			return nil, err
 		}
@@ -108,7 +131,7 @@ func CreateObject(userId, userKey, bucketId, alias string) (*Object, error) {
 
 func ListObjects(userId, userKey, bucketId string) (*[]Object, error) {
 	fs := []Object{}
-	rows, err := DB.Query("SELECT objects.id, objects.alias, objects.checksum, objects.size, objects.bucket_id FROM users JOIN buckets ON (buckets.user_id = users.id) JOIN objects ON (objects.bucket_id = buckets.id) WHERE objects.size != 0 AND (buckets.id = $1 OR buckets.name = $2) AND users.id = $3 AND users.key = $4", uid(bucketId), bucketId, userId, userKey)
+	rows, err := DB.Query("SELECT objects.id, objects.alias, objects.checksum, objects.size, objects.bucket_id, objects.public FROM users JOIN buckets ON (buckets.user_id = users.id) JOIN objects ON (objects.bucket_id = buckets.id) WHERE objects.size != 0 AND (buckets.id = $1 OR buckets.name = $2) AND users.id = $3 AND users.key = $4", uid(bucketId), bucketId, userId, userKey)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +139,7 @@ func ListObjects(userId, userKey, bucketId string) (*[]Object, error) {
 
 	for rows.Next() {
 		f := Object{}
-		err := rows.Scan(&f.ID, &f.Alias, &f.CheckSum, &f.Size, &f.BucketID)
+		err := rows.Scan(&f.ID, &f.Alias, &f.CheckSum, &f.Size, &f.BucketID, &f.Public)
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +161,7 @@ func DeleteObject(userId, userKey, bucketId, id string) error {
 }
 
 func CleanEmptyObjects() {
-	rows, err := DB.Query("SELECT objects.id, objects.alias, objects.checksum, objects.size, objects.bucket_id FROM objects WHERE size = 0")
+	rows, err := DB.Query("SELECT objects.id, objects.alias, objects.checksum, objects.size, objects.bucket_id, objects.public FROM objects WHERE size = 0")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -146,7 +169,7 @@ func CleanEmptyObjects() {
 
 	for rows.Next() {
 		o := Object{}
-		err = rows.Scan(&o.ID, &o.Alias, &o.CheckSum, &o.Size, &o.BucketID)
+		err = rows.Scan(&o.ID, &o.Alias, &o.CheckSum, &o.Size, &o.BucketID, &o.Public)
 		if err != nil {
 			fmt.Println(err)
 		}

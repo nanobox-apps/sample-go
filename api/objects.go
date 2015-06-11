@@ -78,6 +78,7 @@ func replaceObject(rw http.ResponseWriter, req *http.Request) {
 
 	// set size of replaced object
 	obj.Size = int64(size)
+	obj.Public = req.Header.Get("Public") == "true"
 	obj.CheckSum = fmt.Sprintf("%x", hash.Sum(nil))
 	err = models.SaveObject(obj)
 	if err != nil {
@@ -106,8 +107,6 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	if err == nil {
 		replaceObject(rw, req)
 		return
-	} else {
-		lumber.Error("Create Object: Get Existing :%s",err.Error())
 	}
 
 	obj, err := models.CreateObject(userId(req), userKey(req), bucketId(req), objectId(req))
@@ -142,6 +141,7 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	}
 	//
 	obj.Size = int64(size)
+	obj.Public = req.Header.Get("Public") == "true"
 	obj.CheckSum = fmt.Sprintf("%x", hash.Sum(nil))
 	err = models.SaveObject(obj)
 	if err != nil {
@@ -176,6 +176,39 @@ func createObject(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(f)
+}
+
+func getPublicObject(rw http.ResponseWriter, req *http.Request) {
+	lumber.Info("GETPUBLICOBJECT!!")
+	obj, err := models.GetPublicObject(parsePublicPath(req))
+	if err != nil {
+		lumber.Error("Get Object: PublicGet: %s",err.Error())		
+		rw.WriteHeader(422)
+		return
+	}
+	if obj.Size == 0 {
+		lumber.Info("object size is 0", obj.Size)
+		rw.WriteHeader(422)
+		rw.Write([]byte("incomplete file"))
+		return
+	}
+
+	rc, err := obj.ReadCloser()
+	if err != nil {
+		lumber.Error("Get Object: Get ReadCloser :%s",err.Error())
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	defer rc.Close()
+
+	rw.Header().Set("Content-Type", "application/octet-stream")
+	_, err = io.Copy(rw, rc)
+	if err != nil {
+		lumber.Error("Get Object: Copy :%s",err.Error())		
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func getObject(rw http.ResponseWriter, req *http.Request) {

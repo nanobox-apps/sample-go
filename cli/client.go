@@ -68,6 +68,9 @@ func createObject(alias string) {
 	req := buildRequest("POST", "/objects")
 	req.Body = os.Stdin
 	req.Header.Add("Objectalias", alias)
+	if public {
+		req.Header.Add("Public", "true")
+	}
 	resp, err := (&http.Client{}).Do(req)
 	handleError(err)
 	handleJson(resp)

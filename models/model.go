@@ -53,7 +53,7 @@ func Initialize(creds string, s Storage) error {
 	}
 
 	// create the objects table
-	_, err = DB.Exec("CREATE TABLE IF NOT EXISTS objects (id uuid PRIMARY KEY, alias character varying(255) NOT NULL, size bigint, checksum character(32), bucket_id uuid references buckets(id) NOT NULL, UNIQUE (bucket_id, alias))")
+	_, err = DB.Exec("CREATE TABLE IF NOT EXISTS objects (id uuid PRIMARY KEY, alias character varying(255) NOT NULL, size bigint, checksum character(32), bucket_id uuid references buckets(id) NOT NULL, public boolean DEFAULT FALSE, UNIQUE (bucket_id, alias))")
 	if err != nil {
 		return err
 	}

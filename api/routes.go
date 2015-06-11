@@ -22,6 +22,8 @@ func registerRoutes() *pat.Router {
 	router.Post("/users", handleRequest(adminAccess(createUser)))
 	router.Delete("/users/{id}", handleRequest(adminAccess(deleteUser)))
 
+	router.Get("/{user}/{bucket}/{id}", handleRequest(getPublicObject))
+	
 	router.Get("/", func(rw http.ResponseWriter, req *http.Request) {
 		rw.Write([]byte("привет мир"))
 	})

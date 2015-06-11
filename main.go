@@ -54,7 +54,6 @@ func setLogLevel() {
 	default:
 		lumber.Info("the log level provided ("+level+") is not available, defaulting to INFO")
 	}
-	
 }
 
 var port string
