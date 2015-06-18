@@ -82,6 +82,19 @@ func showObjectSize(id string) {
 	handleBadStatus(resp)
 	fmt.Println(resp.Header.Get("Object-Size"))
 }
+
+func setObjectPublic(id string) {
+	resp, err := roundTrip("PUT", "/public/objects/"+id)
+	handleError(err)
+	handleJson(resp)
+}
+
+func getObjectInfo(id string) {
+	resp, err := roundTrip("GET", "/info/objects/"+id)
+	handleError(err)
+	handleJson(resp)
+}
+
 func getObject(id string) {
 	// must read full body and out put either to file or stdout
 	resp, err := roundTrip("GET", "/objects/"+id)

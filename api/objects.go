@@ -243,6 +243,32 @@ func getObject(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func setObjectPublic(rw http.ResponseWriter, req *http.Request) {
+	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
+	if err != nil {
+		lumber.Error("SetObjectPublic: Get :%s",err.Error())		
+		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	obj.Public = true
+	err = models.SaveObject(obj)
+	if err != nil {
+		lumber.Error("SetObjectPublic: Save :%s",err.Error())		
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	bytes, err := json.Marshal(obj)
+	if err != nil {
+		lumber.Error("SetObjectPublic: Json Marshal :%s",err.Error())
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Write(bytes)
+}
+
 func getObjectInfo(rw http.ResponseWriter, req *http.Request) {
 	obj, err := models.GetObject(userId(req), userKey(req), bucketId(req), objectId(req))
 	if err != nil {
@@ -254,6 +280,18 @@ func getObjectInfo(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Object-Alias", obj.Alias)
 	rw.Header().Set("Object-Size", strconv.FormatInt(obj.Size, 10))
 	rw.Header().Set("Object-Checksum", obj.CheckSum)
+
+	if req.Method == "GET" {
+		bytes, err := json.Marshal(obj)
+		if err != nil {
+			lumber.Error("Get Object Info: Json Marshal :%s",err.Error())
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.Write(bytes)	
+	}
 }
 
 func deleteObject(rw http.ResponseWriter, req *http.Request) {

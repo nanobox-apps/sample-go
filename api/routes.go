@@ -5,6 +5,8 @@ import "net/http"
 func registerRoutes() *pat.Router {
 	router := pat.New()
 
+	router.Put("/public/objects/{id}", handleRequest(setObjectPublic))
+	router.Get("/info/objects/{id}", handleRequest(getObjectInfo))
 	router.Post("/objects", handleRequest(createObject))
 	router.Add("HEAD", "/objects/{id}", handleRequest(getObjectInfo))
 	router.Get("/objects/{id}", handleRequest(getObject))

@@ -30,6 +30,10 @@ func main() {
 		deleteBucket(flag.Arg(1))
 	case "list-objects", "list_objects", "listobjects":
 		listObjects()
+	case "show-object-info", "show_object_info", "showobjectinfo":
+		getObjectInfo(flag.Arg(1))
+	case "set-object-public", "set_object_public", "setobjectpublic":
+		setObjectPublic(flag.Arg(1))
 	case "object-size", "object_size", "objectsize":
 		showObjectSize(flag.Arg(1))
 	case "get-object", "get_object", "getobject":
