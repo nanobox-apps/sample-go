@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/blobstache/blobstache/models"
+	"../models"
 	"net/http"
 	"github.com/jcelliott/lumber"
 	"strconv"

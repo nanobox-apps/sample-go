@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/blobstache/blobstache/backends"
+	"../backends"
 	"os"
 	"regexp"
 	"testing"

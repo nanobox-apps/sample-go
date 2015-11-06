@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"github.com/blobstache/blobstache/backends/backendtest"
-	"github.com/blobstache/blobstache/models"
+	"../backends/backendtest"
+	"../models"
 	"net/http"
 	"net/http/httptest"
 	"os"

@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/jcelliott/lumber"
-	"github.com/blobstache/blobstache/models"
+	"../models"
 	"net/http"
 )
 

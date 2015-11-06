@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/blobstache/blobstache/models"
+	"../models"
 	"net/http"
 	"regexp"
 	"github.com/jcelliott/lumber"

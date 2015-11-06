@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/blobstache/blobstache/api"
-	"github.com/blobstache/blobstache/backends"
-	"github.com/blobstache/blobstache/models"
+	"./api"
+	"./backends"
+	"./models"
 	_ "net/http/pprof"
 	"github.com/jcelliott/lumber"
 	"flag"
